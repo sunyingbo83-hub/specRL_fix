@@ -168,7 +168,7 @@ class CMakeBuild(build_ext):
 
 if __name__ == "__main__":
     setup(
-        name="specrl-suffix-cache",
+        name="specrl_fix-suffix-cache",
         version="0.1.0",
         ext_modules=[
             CMakeExtension("suffix_cache._C", "."),
