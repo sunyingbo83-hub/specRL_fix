@@ -40,6 +40,11 @@ public:
         const std::vector<float>& response_lengths,
         int responses_per_prompt);
 
+    // 新增的update_prompt_cache函数声明
+    void update_prompt_cache(
+        const std::vector<std::vector<int>>& prompts,
+        const std::vector<float>& prompt_lengths);
+
 private:
     std::vector<std::string> server_addresses_;
     std::vector<std::unique_ptr<specrl::RolloutCacheService::Stub>> stubs_;
