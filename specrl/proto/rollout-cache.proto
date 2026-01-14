@@ -15,7 +15,7 @@
 // Protocol definition for rollout cache service
 syntax = "proto3";
 
-package specrl;
+package specrl_fix;
 
 // The request message containing the prompt hash and responses
 message UpdateCacheRequest {
