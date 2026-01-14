@@ -9,7 +9,7 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "specrl"
+name = "specrl_fix"
 version = "0.1.0"
 description = "Speculative Decoding RL - Cache management with suffix tree support"
 readme = "README.md"
@@ -52,10 +52,10 @@ Repository = "https://github.com/He-Jingkai/specRL"
 Issues = "https://github.com/He-Jingkai/specRL/issues"
 
 [tool.setuptools]
-packages = ["specrl", "specrl.cache_updater", "specrl.suffix_cache"]
+packages = ["specrl_fix", "specrl_fix.cache_updater", "specrl_fix.suffix_cache"]
 
 [tool.setuptools.package-dir]
-specrl = "specrl"
+specrl_fix = "specrl_fix"
 
 [tool.black]
 line-length = 100
