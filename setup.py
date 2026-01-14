@@ -356,7 +356,7 @@ if __name__ == "__main__":
         author="jingkai.he@bytedance.com",
         license="Apache-2.0",
         python_requires=">=3.8",
-        packages=["specrl", "specrl.cache_updater", "specrl.suffix_cache"],
+        packages=["specrl_fix", "specrl_fix.cache_updater", "specrl_fix.suffix_cache"],
         package_dir={
             "specrl_fix": "specrl",
             "specrl_fix.cache_updater": "specrl/cache_updater",
