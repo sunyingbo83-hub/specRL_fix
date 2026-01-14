@@ -31,5 +31,9 @@ PYBIND11_MODULE(_C, m) {
              py::arg("prompt_lengths"),
              py::arg("response_lengths"),
              py::arg("responses_per_prompt"),
+             py::call_guard<py::gil_scoped_release>())
+        .def("update_prompt_cache", &SuffixCacheUpdater::update_prompt_cache,
+             py::arg("prompts"),
+             py::arg("prompt_lengths"),
              py::call_guard<py::gil_scoped_release>());
 }
