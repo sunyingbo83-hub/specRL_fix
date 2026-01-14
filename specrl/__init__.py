@@ -20,13 +20,13 @@ This package provides cache management tools for speculative decoding:
 - suffix_cache: For suffix tree based cache management
 
 Usage:
-    from specrl.cache_updater import SuffixCacheUpdater
-    from specrl.suffix_cache import SuffixCache, SuffixSpecResult, RolloutCacheServer
+    from specrl_fix.cache_updater import SuffixCacheUpdater
+    from specrl_fix.suffix_cache import SuffixCache, SuffixSpecResult, RolloutCacheServer
 """
 
 __version__ = "0.1.0"
 
 # Do NOT automatically import submodules to avoid protobuf registration conflicts
 # Users should explicitly import what they need:
-#   from specrl.cache_updater import SuffixCacheUpdater
-#   from specrl.suffix_cache import SuffixCache, SuffixSpecResult, RolloutCacheServer
+#   from specrl_fix.cache_updater import SuffixCacheUpdater
+#   from specrl_fix.suffix_cache import SuffixCache, SuffixSpecResult, RolloutCacheServer
