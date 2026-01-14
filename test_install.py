@@ -65,7 +65,7 @@ def test_cache_updater():
     test_code = textwrap.dedent("""
         import sys
         try:
-            from specrl.cache_updater import SuffixCacheUpdater
+            from specrl_fix.cache_updater import SuffixCacheUpdater
             print("✓ SuffixCacheUpdater imported successfully")
             
             # Test instantiation (without server connection)
@@ -84,7 +84,7 @@ def test_cache_updater():
             sys.exit(1)
     """)
     
-    return run_test_in_subprocess(test_code, "specrl.cache_updater")
+    return run_test_in_subprocess(test_code, "specrl_fix.cache_updater")
 
 
 def test_suffix_cache():
@@ -92,7 +92,7 @@ def test_suffix_cache():
     test_code = textwrap.dedent("""
         import sys
         try:
-            from specrl.suffix_cache import SuffixCache, SuffixSpecResult, RolloutCacheServer
+            from specrl_fix.suffix_cache import SuffixCache, SuffixSpecResult, RolloutCacheServer
             print("✓ SuffixCache imported successfully")
             print("✓ SuffixSpecResult imported successfully")
             print("✓ RolloutCacheServer imported successfully")
@@ -121,7 +121,7 @@ def test_suffix_cache():
             sys.exit(1)
     """)
     
-    return run_test_in_subprocess(test_code, "specrl.suffix_cache")
+    return run_test_in_subprocess(test_code, "specrl_fix.suffix_cache")
 
 
 def main():
@@ -132,8 +132,8 @@ def main():
     results = []
     
     # Test each module
-    results.append(("specrl.cache_updater", test_cache_updater()))
-    results.append(("specrl.suffix_cache", test_suffix_cache()))
+    results.append(("specrl_fix.cache_updater", test_cache_updater()))
+    results.append(("specrl_fix.suffix_cache", test_suffix_cache()))
     
     # Summary
     print("\n" + "=" * 50)
