@@ -1,17 +1,17 @@
 # Include C++ source files
-recursive-include specrl/cache_updater *.cc *.h
-recursive-include specrl/suffix_cache *.cc *.h
+recursive-include specrl_fix/cache_updater *.cc *.h
+recursive-include specrl_fix/suffix_cache *.cc *.h
 
 # Include shared proto files
-recursive-include specrl/proto *.proto *.cc *.h
+recursive-include specrl_fix/proto *.proto *.cc *.h
 
 # Include CMake files
-include specrl/proto/CMakeLists.txt
-include specrl/cache_updater/CMakeLists.txt
-include specrl/suffix_cache/CMakeLists.txt
+include specrl_fix/proto/CMakeLists.txt
+include specrl_fix/cache_updater/CMakeLists.txt
+include specrl_fix/suffix_cache/CMakeLists.txt
 
 # Include Python package files
-include specrl/__init__.py
+include specrl_fix/__init__.py
 
 # Include documentation
 include README.md
