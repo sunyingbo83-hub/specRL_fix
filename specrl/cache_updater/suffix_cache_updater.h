@@ -24,7 +24,7 @@
 #include <grpcpp/grpcpp.h>
 #include "rollout-cache.grpc.pb.h"
 
-using namespace specrl;
+using namespace specrl_fix;
 
 class SuffixCacheUpdater {
 public:
@@ -47,7 +47,7 @@ public:
 
 private:
     std::vector<std::string> server_addresses_;
-    std::vector<std::unique_ptr<specrl::RolloutCacheService::Stub>> stubs_;
+    std::vector<std::unique_ptr<specrl_fix::RolloutCacheService::Stub>> stubs_;
 
     // Helper to extract server addresses from environment
     std::vector<std::string> extract_addresses_from_env();
