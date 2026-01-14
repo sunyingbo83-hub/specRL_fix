@@ -13,11 +13,11 @@
 # limitations under the License.
 
 """
-Setup script for specRL package.
+Setup script for specRL_fix package.
 
 This package contains two C++ extension modules built with pybind11:
-- specrl.cache_updater: For updating the rollout cache
-- specrl.suffix_cache: For suffix tree based cache management
+- specrl_fix.cache_updater: For updating the rollout cache
+- specrl_fix.suffix_cache: For suffix tree based cache management
 """
 
 import os
@@ -348,7 +348,7 @@ if __name__ == "__main__":
     ROOT_DIR = Path(__file__).parent.resolve()
 
     setup(
-        name="specrl",
+        name="specrl_fix",
         version=get_version(),
         description="Speculative Decoding RL - Cache management with suffix tree support",
         long_description=(ROOT_DIR / "README.md").read_text(encoding="utf-8") if (ROOT_DIR / "README.md").exists() else "",
@@ -356,15 +356,15 @@ if __name__ == "__main__":
         author="jingkai.he@bytedance.com",
         license="Apache-2.0",
         python_requires=">=3.8",
-        packages=["specrl", "specrl.cache_updater", "specrl.suffix_cache"],
+        packages=["specrl_fix", "specrl_fix.cache_updater", "specrl_fix.suffix_cache"],
         package_dir={
-            "specrl": "specrl",
-            "specrl.cache_updater": "specrl/cache_updater",
-            "specrl.suffix_cache": "specrl/suffix_cache",
+            "specrl_fix": "specrl_fix",
+            "specrl_fix.cache_updater": "specrl_fix/cache_updater",
+            "specrl_fix.suffix_cache": "specrl_fix/suffix_cache",
         },
         ext_modules=[
-            CMakeExtension("specrl.cache_updater._C", str(ROOT_DIR / "specrl" / "cache_updater")),
-            CMakeExtension("specrl.suffix_cache._C", str(ROOT_DIR / "specrl" / "suffix_cache")),
+            CMakeExtension("specrl_fix.cache_updater._C", str(ROOT_DIR / "specrl_fix" / "cache_updater")),
+            CMakeExtension("specrl_fix.suffix_cache._C", str(ROOT_DIR / "specrl_fix" / "suffix_cache")),
         ],
         cmdclass={"build_ext": CMakeBuild},
         install_requires=[],
