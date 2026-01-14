@@ -168,7 +168,7 @@ class CMakeBuild(build_ext):
 
 if __name__ == "__main__":
     setup(
-        name="specrl-cache-updater",
+        name="specrl_fix-cache-updater",
         version="0.1.0",
         ext_modules=[
             CMakeExtension("cache_updater._C", "."),
