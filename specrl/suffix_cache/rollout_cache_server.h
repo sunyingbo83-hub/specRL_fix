@@ -47,8 +47,8 @@ const unsigned long long SHARED_MEMORY_SIZE = 500ULL * 1024ULL * 1024ULL * 1024U
 // Using declarations for Boost.Interprocess
 using namespace boost::interprocess;
 
-// Using specrl namespace for proto types
-using namespace specrl;
+// Using specrl_fix namespace for proto types
+using namespace specrl_fix;
 
 // Shared memory hash map for suffix trees
 typedef offset_ptr<SuffixTree> SuffixTreePtr;
