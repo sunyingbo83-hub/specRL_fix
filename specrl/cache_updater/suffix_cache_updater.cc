@@ -213,23 +213,33 @@ void SuffixCacheUpdater::update_response_cache(
         const int* token_data = prompt.data() + (prompt.size() - prompt_len);
         size_t bytes_size = prompt_len * sizeof(int);
         uint64_t hash = XXH64(token_data, bytes_size, 0);
-
         request.set_prompt_hash(hash);
-
+        
+        // 2. 增量提取prompt tokens（仅传递新增部分）
         TokenList* prompt_tokens = request.mutable_prompt();
-        for (int k = prompt.size() - prompt_len; k < static_cast<int>(prompt.size()); ++k) {
+        size_t uploaded_len = prompt_hash_to_uploaded_len_[hash]; // 已上传长度
+        size_t start_idx = std::min(uploaded_len, prompt.size() - prompt_len); // 增量起始位置
+        for (size_t k = start_idx; k < prompt.size(); ++k) {
             prompt_tokens->add_tokens(prompt[k]);
         }
+        // for (int k = prompt.size() - prompt_len; k < static_cast<int>(prompt.size()); ++k) {
+        //     prompt_tokens->add_tokens(prompt[k]);
+        // }
 
-        // Collect the batch of responses for this prompt
-        std::vector<std::vector<int>> resp_batch;
+        // 3. 增量提取response tokens（仅传递新增部分）
         for (int j = 0; j < responses_per_prompt; ++j) {
             int resp_idx = prompt_idx + j;
+            const std::vector<int>& resp = responses[resp_idx];
+            int resp_len = int(response_lengths[resp_idx]);
             TokenList* response_tokens = request.add_responses();
-            for (int k = 0; k < response_lengths[resp_idx]; ++k) {
-                response_tokens->add_tokens(responses[resp_idx][k]);
+            
+            // 仅添加新增的response tokens（假设resp的增量起始为0，可扩展为记录已上传长度）
+            for (int k = 0; k < resp_len; ++k) {
+                response_tokens->add_tokens(resp[k]);
             }
         }
+        // 4. 更新已上传长度（记录本次上传的prompt长度）
+        prompt_hash_to_uploaded_len_[hash] = prompt.size();
     }
 
     // Now send all requests to all servers asynchronously
