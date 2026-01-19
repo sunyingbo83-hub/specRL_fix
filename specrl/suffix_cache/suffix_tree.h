@@ -220,6 +220,8 @@ private:
     void _allocate_bulk_memory(size_t estimated_nodes);
     NodePtr _create_node_from_bulk(const ChildrenMap::allocator_type& alloc);
     void _destroy_bulk_memory();
+    // 新增：记录已分配的批量内存大小，避免重复分配
+    size_t _allocated_node_count = 0;
 
     // Copy local tree to shared memory
     NodePtr _copy_local_tree_to_shared(LocalNode* local_node,
