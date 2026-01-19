@@ -22,15 +22,38 @@ grpc::Status RolloutCacheServiceImpl::UpdateCache(
     grpc::ServerContext* context,
     const UpdateCacheRequest* request,
     UpdateCacheResponse* response) {
+    // 1. 核心：先获取prompt_hash，加锁查找已有树
+    const uint64_t prompt_hash = request->prompt_hash();
+    auto mutex = segment_->find<interprocess_mutex>("mutex").first;
+    scoped_lock<interprocess_mutex> shm_lock(*mutex); // 全程加锁保证进程安全
+
+    uint64_t segment_base = (uint64_t)segment_->get_address();
+    SuffixTree* tree = nullptr;
+    auto it = tree_map_->find(prompt_hash);
+
+    // 2. 查找已有树：存在则复用，不存在则创建新树
+    if (it != tree_map_->end()) {
+        // 已有树：从共享内存地址计算出树的指针
+        uint64_t existing_tree_addr = it->second;
+        tree = (SuffixTree*)(existing_tree_addr + segment_base);
+        std::cout << "Found existing suffix tree for hash " << prompt_hash << ", incremental update..." << std::endl;
+    } else {
+        // 无树：创建新树（保持原有逻辑）
+        ShmemAllocator alloc(segment_->get_segment_manager());
+        tree = segment_->construct<SuffixTree>(anonymous_instance)(alloc);
+        std::cout << "Create new suffix tree for hash " << prompt_hash << std::endl;
+    }
+    
     // Use mutex to ensure thread-safe console output
 
     // std::cout << "Received UpdateCacheRequest:" << std::endl;
     // std::cout << "  Prompt hash: " << request->prompt_hash() << std::endl;
     // std::cout << "  Number of responses: " << request->responses_size() << std::endl;
 
-    ShmemAllocator alloc(segment_->get_segment_manager());
-    SuffixTree* tree = segment_->construct<SuffixTree>(anonymous_instance)(alloc);
+    // ShmemAllocator alloc(segment_->get_segment_manager());
+    // SuffixTree* tree = segment_->construct<SuffixTree>(anonymous_instance)(alloc);
 
+    // 3. 拼接增量tokens（逻辑与原一致，但仅传给已有/新树）
     const int prefix_tokens_to_include = 5;
     int tokens_len = request->prompt().tokens_size() + 1;
     for (int i = 0; i < request->responses_size(); i++) {
@@ -41,6 +64,8 @@ grpc::Status RolloutCacheServiceImpl::UpdateCache(
     tokens.reserve(tokens_len);
     std::vector<int> prefix_tokens;
     prefix_tokens.reserve(5);
+
+    
     if (request->has_prompt() && request->prompt().tokens_size() > 0) {
         const auto& token_list = request->prompt();
         for (int j = 0; j < token_list.tokens_size(); j++)
@@ -63,28 +88,37 @@ grpc::Status RolloutCacheServiceImpl::UpdateCache(
         tokens.push_back(-1);
         // std::cout << "  Response " << i << " added to suffix tree, size:" << token_list.tokens_size() << std::endl;
     }
-
+    
+    // 4. 增量更新：调用SuffixTree的extend方法
     tree->extend(0, tokens);
-    SuffixTree* existing_tree_ptr = nullptr;
-    {
-        const uint64_t prompt_hash = request->prompt_hash();
-        auto mutex = segment_->find<interprocess_mutex>("mutex").first;
-        scoped_lock<interprocess_mutex> shm_lock(*mutex);
-        auto it = tree_map_->find(prompt_hash);
-        uint64_t segment_base = (uint64_t)segment_->get_address();
+    std::cout << "Incremental extend suffix tree: add " << tokens.size() << " tokens" << std::endl;
+
+    // 5. 仅当是新树时，才插入到shared_tree_map（已有树无需更新映射）
+    if (it == tree_map_->end()) {
         uint64_t tree_ptr = (uint64_t)tree - segment_base;
-        if (it != tree_map_->end()) {
-            // Delete the existing tree
-            uint64_t existing_tree = it->second;
-            it->second = tree_ptr;
-            existing_tree_ptr = (SuffixTree*)(existing_tree + segment_base);
-        }
         tree_map_->emplace(prompt_hash, tree_ptr);
     }
+    
+    // SuffixTree* existing_tree_ptr = nullptr;
+    // {
+    //     const uint64_t prompt_hash = request->prompt_hash();
+    //     auto mutex = segment_->find<interprocess_mutex>("mutex").first;
+    //     scoped_lock<interprocess_mutex> shm_lock(*mutex);
+    //     auto it = tree_map_->find(prompt_hash);
+    //     uint64_t segment_base = (uint64_t)segment_->get_address();
+    //     uint64_t tree_ptr = (uint64_t)tree - segment_base;
+    //     if (it != tree_map_->end()) {
+    //         // Delete the existing tree
+    //         uint64_t existing_tree = it->second;
+    //         it->second = tree_ptr;
+    //         existing_tree_ptr = (SuffixTree*)(existing_tree + segment_base);
+    //     }
+    //     tree_map_->emplace(prompt_hash, tree_ptr);
+    // }
 
-    if (existing_tree_ptr) {
-        segment_->destroy_ptr(existing_tree_ptr);
-    }
+    // if (existing_tree_ptr) {
+    //     segment_->destroy_ptr(existing_tree_ptr);
+    // }
     response->set_success(true);
 
     return grpc::Status::OK;
