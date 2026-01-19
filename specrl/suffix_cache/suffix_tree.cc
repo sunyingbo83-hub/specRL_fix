@@ -588,22 +588,43 @@ int SuffixTree::_update_node_counts(NodePtr node, int seq_id) {
 }
 
 void SuffixTree::_allocate_bulk_memory(size_t estimated_nodes) {
-    if (_bulk_memory.memory_block) return; // Already allocated
+    // 增量优化：仅当预估节点数 > 已分配节点数时，才重新分配
+    if (estimated_nodes <= _allocated_node_count && _bulk_memory.memory_block) {
+        return; // 已有内存足够，无需重新分配
+    }
 
-    auto s_manager = _alloc.get_segment_manager();
-    _bulk_memory.segment_manager = s_manager;
+    // 原有分配逻辑（保持不变）
+    if (_bulk_memory.memory_block && _bulk_memory.segment_manager) {
+        _bulk_memory.segment_manager->deallocate(_bulk_memory.memory_block);
+    }
 
-    // Estimate memory needed: nodes + some extra space
-    // Each Node contains children map which needs extra space
+    // 计算总内存大小：每个Node的大小 * 预估节点数
     size_t node_size = sizeof(Node);
-    size_t extra_space_per_node = 128; // For children map overhead
-    _bulk_memory.total_size = estimated_nodes * (node_size + extra_space_per_node);
+    size_t total_size = estimated_nodes * node_size;
 
-    // Allocate bulk memory block
-    _bulk_memory.memory_block = s_manager->allocate(_bulk_memory.total_size);
-    _bulk_memory.used_size = 0;
-    _bulk_memory.node_count = 0;
+    // 从共享内存分配批量内存
+    _bulk_memory.memory_block = _bulk_memory.segment_manager->allocate(total_size);
+    _bulk_memory.segment_manager = _alloc.get_segment_manager();
+    _allocated_node_count = estimated_nodes; // 记录已分配节点数
+
+    std::cout << "Allocate bulk memory for suffix tree: " << total_size / 1024 << " KB (" << estimated_nodes << " nodes)" << std::endl;
 }
+//     if (_bulk_memory.memory_block) return; // Already allocated
+
+//     auto s_manager = _alloc.get_segment_manager();
+//     _bulk_memory.segment_manager = s_manager;
+
+//     // Estimate memory needed: nodes + some extra space
+//     // Each Node contains children map which needs extra space
+//     size_t node_size = sizeof(Node);
+//     size_t extra_space_per_node = 128; // For children map overhead
+//     _bulk_memory.total_size = estimated_nodes * (node_size + extra_space_per_node);
+
+//     // Allocate bulk memory block
+//     _bulk_memory.memory_block = s_manager->allocate(_bulk_memory.total_size);
+//     _bulk_memory.used_size = 0;
+//     _bulk_memory.node_count = 0;
+// }
 
 NodePtr SuffixTree::_create_node_from_bulk(const ChildrenMap::allocator_type& alloc) {
     if (!_bulk_memory.memory_block) {
