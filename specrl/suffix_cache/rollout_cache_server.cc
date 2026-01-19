@@ -168,6 +168,33 @@ bool RolloutCacheServer::Initialize() {
     }
 }
 
+bool RolloutCacheServer::EvictTree(uint64_t prompt_hash) {
+    if (!segment_ || !tree_map_) {
+        std::cerr << "Cannot evict tree: shared memory not initialized" << std::endl;
+        return false;
+    }
+
+    auto mutex = segment_->find<interprocess_mutex>("mutex").first;
+    scoped_lock<interprocess_mutex> shm_lock(*mutex);
+
+    uint64_t segment_base = (uint64_t)segment_->get_address();
+    auto it = tree_map_->find(prompt_hash);
+    if (it == tree_map_->end()) {
+        std::cerr << "Tree not found for hash: " << prompt_hash << std::endl;
+        return false;
+    }
+
+    // 销毁树并移除映射
+    uint64_t tree_addr = it->second;
+    SuffixTree* tree = (SuffixTree*)(tree_addr + segment_base);
+    segment_->destroy_ptr(tree);
+    tree_map_->erase(it);
+
+    std::cout << "Evicted suffix tree for hash: " << prompt_hash << std::endl;
+    return true;
+}
+
+
 // Start the server
 bool RolloutCacheServer::Start() {
     // Make sure we've initialized our resources
