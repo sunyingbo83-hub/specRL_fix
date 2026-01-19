@@ -46,6 +46,8 @@ public:
         const std::vector<float>& prompt_lengths);
 
 private:
+    // 新增：记录每个prompt_hash对应的已上传tokens长度（用于增量传递）
+    std::unordered_map<uint64_t, size_t> prompt_hash_to_uploaded_len_;
     std::vector<std::string> server_addresses_;
     std::vector<std::unique_ptr<specrl_fix::RolloutCacheService::Stub>> stubs_;
 
