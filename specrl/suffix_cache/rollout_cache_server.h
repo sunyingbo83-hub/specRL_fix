@@ -80,6 +80,9 @@ public:
     // Initialize the shared memory and create the service
     bool Initialize();
 
+    // 新增：按prompt_hash淘汰指定后缀树
+    bool EvictTree(uint64_t prompt_hash);
+
     // Start the server
     bool Start();
 
